@@ -257,7 +257,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
      *
      * @param minNewCapacity 当前允许的最小容量
      * @param maxCapacity    最大容量
-     * @return
+     * @return 扩容后的容量
      */
     @Override
     public int calculateNewCapacity(int minNewCapacity, int maxCapacity) {

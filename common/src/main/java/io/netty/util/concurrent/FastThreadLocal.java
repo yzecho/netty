@@ -108,9 +108,7 @@ public class FastThreadLocal<V> {
         variablesToRemove.add(variable);
     }
 
-    private static void removeFromVariablesToRemove(
-            InternalThreadLocalMap threadLocalMap, FastThreadLocal<?> variable) {
-
+    private static void removeFromVariablesToRemove(InternalThreadLocalMap threadLocalMap, FastThreadLocal<?> variable) {
         Object v = threadLocalMap.indexedVariable(VARIABLES_TO_REMOVE_INDEX);
 
         if (v == InternalThreadLocalMap.UNSET || v == null) {
@@ -191,8 +189,11 @@ public class FastThreadLocal<V> {
      * Set the value for the current thread.
      */
     public final void set(V value) {
+        // 1. value 是否为缺省值
         if (value != InternalThreadLocalMap.UNSET) {
+            // 2. 获取当前线程的 InternalThreadLocalMap
             InternalThreadLocalMap threadLocalMap = InternalThreadLocalMap.get();
+            // 3. 将 InternalThreadLocalMap 中数据替换为新的 value
             setKnownNotUnset(threadLocalMap, value);
         } else {
             remove();
@@ -214,7 +215,9 @@ public class FastThreadLocal<V> {
      * @see InternalThreadLocalMap#setIndexedVariable(int, Object).
      */
     private void setKnownNotUnset(InternalThreadLocalMap threadLocalMap, V value) {
+        // 1. 找到数组下标 index 位置，设置新的 value
         if (threadLocalMap.setIndexedVariable(index, value)) {
+            // 2. 将 FastThreadLocal 对象保存到待清理的 Set 中
             addToVariablesToRemove(threadLocalMap, this);
         }
     }

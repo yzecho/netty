@@ -39,8 +39,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * unless you know what you are doing.
  */
 public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap {
-    private static final ThreadLocal<InternalThreadLocalMap> slowThreadLocalMap =
-            new ThreadLocal<InternalThreadLocalMap>();
+
+    private static final ThreadLocal<InternalThreadLocalMap> slowThreadLocalMap = new ThreadLocal<InternalThreadLocalMap>();
+
     private static final AtomicInteger nextIndex = new AtomicInteger();
     // Internal use only.
     public static final int VARIABLES_TO_REMOVE_INDEX = nextVariableIndex();
@@ -57,10 +58,14 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     private static final int STRING_BUILDER_MAX_SIZE;
 
     private static final InternalLogger logger;
-    /** Internal use only. */
+    /**
+     * Internal use only.
+     */
     public static final Object UNSET = new Object();
 
-    /** Used by {@link FastThreadLocal} */
+    /**
+     * Used by {@link FastThreadLocal}
+     */
     private Object[] indexedVariables;
 
     // Core thread-locals
@@ -82,7 +87,9 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
     private BitSet cleanerFlags;
 
-    /** @deprecated These padding fields will be removed in the future. */
+    /**
+     * @deprecated These padding fields will be removed in the future.
+     */
     public long rp1, rp2, rp3, rp4, rp5, rp6, rp7, rp8;
 
     static {
@@ -111,6 +118,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
     public static InternalThreadLocalMap get() {
         Thread thread = Thread.currentThread();
+        // 当前线程是否为 FastThreadLocalThread 类型
         if (thread instanceof FastThreadLocalThread) {
             return fastGet((FastThreadLocalThread) thread);
         } else {
@@ -119,6 +127,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     }
 
     private static InternalThreadLocalMap fastGet(FastThreadLocalThread thread) {
+        // 获取 FastThreadLocalThread 的 threadLocalMap 属性
         InternalThreadLocalMap threadLocalMap = thread.threadLocalMap();
         if (threadLocalMap == null) {
             thread.setThreadLocalMap(threadLocalMap = new InternalThreadLocalMap());
@@ -127,6 +136,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     }
 
     private static InternalThreadLocalMap slowGet() {
+        // 从 JDK 原生 ThreadLocal 中获取 InternalThreadLocalMap
         InternalThreadLocalMap ret = slowThreadLocalMap.get();
         if (ret == null) {
             ret = new InternalThreadLocalMap();
@@ -161,6 +171,9 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         return nextIndex.get() - 1;
     }
 
+    /**
+     * InternalThreadLocalMap 会初始化一个长度为32的 Object 数据，并赋默认UNSET值
+     */
     private InternalThreadLocalMap() {
         indexedVariables = newIndexedVariableTable();
     }
@@ -175,37 +188,37 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         int count = 0;
 
         if (futureListenerStackDepth != 0) {
-            count ++;
+            count++;
         }
         if (localChannelReaderStackDepth != 0) {
-            count ++;
+            count++;
         }
         if (handlerSharableCache != null) {
-            count ++;
+            count++;
         }
         if (counterHashCode != null) {
-            count ++;
+            count++;
         }
         if (random != null) {
-            count ++;
+            count++;
         }
         if (typeParameterMatcherGetCache != null) {
-            count ++;
+            count++;
         }
         if (typeParameterMatcherFindCache != null) {
-            count ++;
+            count++;
         }
         if (stringBuilder != null) {
-            count ++;
+            count++;
         }
         if (charsetEncoderCache != null) {
-            count ++;
+            count++;
         }
         if (charsetDecoderCache != null) {
-            count ++;
+            count++;
         }
         if (arrayList != null) {
-            count ++;
+            count++;
         }
 
         Object v = indexedVariable(VARIABLES_TO_REMOVE_INDEX);
@@ -324,7 +337,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
     public Object indexedVariable(int index) {
         Object[] lookup = indexedVariables;
-        return index < lookup.length? lookup[index] : UNSET;
+        return index < lookup.length ? lookup[index] : UNSET;
     }
 
     /**
@@ -348,12 +361,12 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         int newCapacity;
         if (index < ARRAY_LIST_CAPACITY_EXPAND_THRESHOLD) {
             newCapacity = index;
-            newCapacity |= newCapacity >>>  1;
-            newCapacity |= newCapacity >>>  2;
-            newCapacity |= newCapacity >>>  4;
-            newCapacity |= newCapacity >>>  8;
+            newCapacity |= newCapacity >>> 1;
+            newCapacity |= newCapacity >>> 2;
+            newCapacity |= newCapacity >>> 4;
+            newCapacity |= newCapacity >>> 8;
             newCapacity |= newCapacity >>> 16;
-            newCapacity ++;
+            newCapacity++;
         } else {
             newCapacity = ARRAY_LIST_CAPACITY_MAX_SIZE;
         }

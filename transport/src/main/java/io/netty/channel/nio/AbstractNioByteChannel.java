@@ -44,7 +44,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
     private static final String EXPECTED_TYPES =
             " (expected: " + StringUtil.simpleClassName(ByteBuf.class) + ", " +
-            StringUtil.simpleClassName(FileRegion.class) + ')';
+                    StringUtil.simpleClassName(FileRegion.class) + ')';
 
     private final Runnable flushTask = new Runnable() {
         @Override
@@ -59,8 +59,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     /**
      * Create a new instance
      *
-     * @param parent            the parent {@link Channel} by which this instance was created. May be {@code null}
-     * @param ch                the underlying {@link SelectableChannel} on which it operates
+     * @param parent the parent {@link Channel} by which this instance was created. May be {@code null}
+     * @param ch     the underlying {@link SelectableChannel} on which it operates
      */
     protected AbstractNioByteChannel(Channel parent, SelectableChannel ch) {
         super(parent, ch, SelectionKey.OP_READ);
@@ -111,7 +111,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         }
 
         private void handleReadException(ChannelPipeline pipeline, ByteBuf byteBuf, Throwable cause, boolean close,
-                RecvByteBufAllocator.Handle allocHandle) {
+                                         RecvByteBufAllocator.Handle allocHandle) {
             if (byteBuf != null) {
                 if (byteBuf.isReadable()) {
                     readPending = false;
@@ -131,6 +131,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             }
         }
 
+        /**
+         * Netty 会不断从 Channel 中读取数据到分配的 ByteBuf 中，然后通过 pipeline.fireChannelRead() 方法触发 ChannelRead 事件的传播
+         */
         @Override
         public final void read() {
             final ChannelConfig config = config();
@@ -147,7 +150,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             boolean close = false;
             try {
                 do {
+                    // 分配 ByteBuf
                     byteBuf = allocHandle.allocate(allocator);
+                    // 将 Channel 中的数据读取到 ByteBuf 中
                     allocHandle.lastBytesRead(doReadBytes(byteBuf));
                     if (allocHandle.lastBytesRead() <= 0) {
                         // nothing was read. release the buffer.
@@ -163,11 +168,13 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
                     allocHandle.incMessagesRead(1);
                     readPending = false;
+                    // 传播 ChannelRead 时间
                     pipeline.fireChannelRead(byteBuf);
                     byteBuf = null;
                 } while (allocHandle.continueReading());
 
                 allocHandle.readComplete();
+                // 传播 readComplete 事件
                 pipeline.fireChannelReadComplete();
 
                 if (close) {
@@ -191,6 +198,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     /**
      * Write objects to the OS.
+     *
      * @param in the collection which contains objects to write.
      * @return The value that should be decremented from the write quantum which starts at
      * {@link ChannelConfig#getWriteSpinCount()}. The typical use cases are as follows:
@@ -305,7 +313,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     /**
      * Write a {@link FileRegion}
      *
-     * @param region        the {@link FileRegion} from which the bytes should be written
+     * @param region the {@link FileRegion} from which the bytes should be written
      * @return amount       the amount of written bytes
      */
     protected abstract long doWriteFileRegion(FileRegion region) throws Exception;
@@ -317,7 +325,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     /**
      * Write bytes form the given {@link ByteBuf} to the underlying {@link java.nio.channels.Channel}.
-     * @param buf           the {@link ByteBuf} from which the bytes should be written
+     *
+     * @param buf the {@link ByteBuf} from which the bytes should be written
      * @return amount       the amount of written bytes
      */
     protected abstract int doWriteBytes(ByteBuf buf) throws Exception;

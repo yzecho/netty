@@ -19,12 +19,12 @@ import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelMetadata;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelOutboundBuffer;
-import io.netty.channel.socket.InternetProtocolFamily;
-import io.netty.util.internal.SocketUtils;
 import io.netty.channel.nio.AbstractNioMessageChannel;
 import io.netty.channel.socket.DefaultServerSocketChannelConfig;
+import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.socket.ServerSocketChannelConfig;
 import io.netty.util.internal.PlatformDependent;
+import io.netty.util.internal.SocketUtils;
 import io.netty.util.internal.SuppressJava6Requirement;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
@@ -45,8 +45,7 @@ import java.util.Map;
  * A {@link io.netty.channel.socket.ServerSocketChannel} implementation which uses
  * NIO selector based implementation to accept new connections.
  */
-public class NioServerSocketChannel extends AbstractNioMessageChannel
-                             implements io.netty.channel.socket.ServerSocketChannel {
+public class NioServerSocketChannel extends AbstractNioMessageChannel implements io.netty.channel.socket.ServerSocketChannel {
 
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
     private static final SelectorProvider DEFAULT_SELECTOR_PROVIDER = SelectorProvider.provider();
@@ -58,8 +57,8 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
 
     private static ServerSocketChannel newChannel(SelectorProvider provider, InternetProtocolFamily family) {
         try {
-            ServerSocketChannel channel =
-                    SelectorProviderUtil.newChannel(OPEN_SERVER_SOCKET_CHANNEL_WITH_FAMILY, provider, family);
+            ServerSocketChannel channel = SelectorProviderUtil.newChannel(OPEN_SERVER_SOCKET_CHANNEL_WITH_FAMILY, provider, family);
+            // 创建 JDK 底层的 ServerSocketChannel
             return channel == null ? provider.openServerSocketChannel() : channel;
         } catch (IOException e) {
             throw new ChannelException("Failed to open a socket.", e);
